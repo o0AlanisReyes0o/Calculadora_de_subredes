@@ -1,0 +1,264 @@
+/* Variables CSS para modo claro (por defecto) */
+:root {
+  --bg-body: #f0f4f8;
+  --bg-header: linear-gradient(135deg, #0FC2C0, #008F8C);
+  --text-primary: #000407;
+  --text-secondary: #333333;
+  --bg-card: #ffffff;
+  --border-card: #000000;
+  --bg-tab: rgba(255, 255, 255, 0.637);
+  --bg-tab-active: #008F8C;
+  --bg-tab-hover: #e6f0ff;
+  --text-tab: #0FC2C0;
+  --text-tab-active: #ffffff;
+  --btn-primary-bg: #0CABA8;
+  --btn-primary-hover: #171818;
+  --shadow-card: rgba(0, 0, 0, 0.05);
+  --input-bg: #ffffff;
+  --input-border: #ced4da;
+  --input-text: #212529;
+}
+
+/* Variables CSS para modo oscuro */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-body: #1a1d2e;
+    --bg-header: linear-gradient(135deg, #0FC2C0, #008F8C);
+    --text-primary: #e9ecef;
+    --text-secondary: #adb5bd;
+    --bg-card: #2d3142;
+    --border-card: #4f5d75;
+    --bg-tab: rgba(77, 89, 122, 0.637);
+    --bg-tab-active: #0FC2C0;
+    --bg-tab-hover: #3d4455;
+    --text-tab: #0FC2C0;
+    --text-tab-active: #1a1d2e;
+    --btn-primary-bg: #0FC2C0;
+    --btn-primary-hover: #0CABA8;
+    --shadow-card: rgba(0, 0, 0, 0.3);
+    --input-bg: #3d4455;
+    --input-border: #4f5d75;
+    --input-text: #e9ecef;
+  }
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  background-color: var(--bg-body);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.bg-primary {
+  background: var(--bg-header) !important;
+}
+
+/* Estilos para cards */
+.card {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-card) !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Estilos para inputs y selects */
+.form-control {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  border-color: var(--input-border) !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.form-control:focus {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  border-color: #0FC2C0 !important;
+  box-shadow: 0 0 0 0.2rem rgba(15, 194, 192, 0.25) !important;
+}
+
+.form-label {
+  color: var(--text-primary) !important;
+}
+
+/* Estilos para tablas */
+table {
+  color: var(--text-primary) !important;
+}
+
+table thead {
+  background-color: var(--bg-tab-active) !important;
+  color: var(--text-tab-active) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  table thead {
+    background-color: #0FC2C0 !important;
+    color: #1a1d2e !important;
+  }
+}
+
+table tbody tr {
+  background-color: var(--bg-card) !important;
+}
+
+table tbody tr:nth-child(even) {
+  background-color: var(--bg-tab) !important;
+}
+
+/* Estilos para código */
+code {
+  background-color: var(--bg-tab) !important;
+  color: var(--text-tab) !important;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.tab-container {
+  display: flex;
+  border-bottom: 2px solid #ccc;
+}
+
+.tab {
+  padding: 10px 20px;
+  cursor: pointer;
+  border: 1px solid var(--text-tab);
+  border-bottom: none;
+  background-color: var(--bg-tab);
+  color: var(--text-tab);
+  margin-right: 5px;
+  border-radius: 10px 10px 0 0;
+  transition: all 0.3s ease;
+}
+
+
+.tab.active {
+  background-color: var(--bg-tab-active);
+  color: var(--text-tab-active);
+  font-weight: bold;
+  border-bottom: 2px solid var(--bg-tab-active);
+}
+
+
+.tab-content {
+  position: relative;
+  /* si cierra muy rápido al cargar, hay que poner lo siguiente: */
+  /* min-height: 400px; */
+}
+
+/* Cada sección (CIDR y VLSM) apilada en la misma posición paraevitar su desplazamiento */
+.seccion {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  transition: opacity 0.4s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* La sección cuando esta visible */
+.seccion:not(.hidden) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Clase auxiliar para ocultar bien las pestañas*/
+.seccion.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Para que el contenido de la calculadora conserve su estilo */
+.seccion .card {
+  border: 1.5px solid var(--border-card);
+  box-shadow: 0 2px 5px var(--shadow-card);
+  border-radius: 0.75rem;
+  background-color: var(--bg-card);
+}
+
+button {
+  margin-top: 10px;
+}
+
+/*Colores que no sean solo el azul de bootstrap*/
+.btn-primary {
+  background-color: var(--btn-primary-bg) !important;
+  border-color: #6c757d !important;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--btn-primary-hover) !important;
+  border-color: #6c757d !important;
+}
+
+.btn-outline-primary {
+  color: var(--text-primary) !important;
+  border-color: var(--text-tab) !important;
+  background-color: transparent !important;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+  color: var(--text-tab-active) !important;
+  background-color: var(--text-tab) !important;
+  border-color: var(--text-tab) !important;
+}
+
+.btn-secondary {
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268 !important;
+  border-color: #545b62 !important;
+}
+
+.btn-info {
+  background-color: #17a2b8 !important;
+  border-color: #17a2b8 !important;
+}
+
+.btn-info:hover {
+  background-color: #138496 !important;
+  border-color: #117a8b !important;
+}
+
+
+/* Estilo para pestañas y tablas */
+.tab {
+  padding: 10px 20px;
+  border: 1px solid var(--text-tab);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 500;
+  background-color: var(--bg-tab);
+  color: var(--text-tab);
+  transition: all 0.3s ease;
+  user-select: none;
+  margin-right: 10px;
+}
+
+/* Es para cuando se activa la pestaña y se vean las letras*/
+.tab.active {
+  background-color: var(--bg-tab-active);
+  color: var(--text-tab-active);
+}
+
+/* Resalta al pasar el mouse */
+.tab:hover {
+  background-color: var(--bg-tab-hover);
+  color: var(--text-tab);
+}
+
+/* Para que el contenedor de la calculadora no tenga el mismo color de fondo */
+.seccion .card {
+  border: 1.5px solid var(--border-card);
+  box-shadow: 0 2px 5px var(--shadow-card); 
+  border-radius: 0.75rem;
+  background-color: var(--bg-card);
+}
+
+
