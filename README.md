@@ -54,5 +54,4 @@ cd Calculadora_de_subredes
 - CSS3
 - JavaScript 
 - GitHub Pages para hosting
-Este proyecto está organizado como una aplicación web estática que incluye:
 
