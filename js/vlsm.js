@@ -2,28 +2,75 @@ $(document).ready(function () {
   $("#calcularVLSM").click(function (e) {
     e.preventDefault();
 
+    // Limpiar mensajes de error previos
+    $(".error-message").remove();
+    $(".is-invalid").removeClass("is-invalid");
+    $("#tablaVLSM").find(".alert").remove();
+
     // obtenemos y validamos la IP base y la máscara
     const ipBase = $("#address").val().trim();
     const netmask = parseInt($("#netmask").val());
 
-    if (!validarIP(ipBase)) {
-      alert("Dirección IP no válida");
-      return;
+    // Array para almacenar todos los errores
+    const errores = [];
+
+    // Validar que se ingresó una IP
+    if (!ipBase) {
+      errores.push({ campo: "#address", mensaje: "Por favor, ingrese una dirección IP." });
+    } else if (!validarIP(ipBase)) {
+      // Validar formato de IP
+      errores.push({ campo: "#address", mensaje: "La dirección IP ingresada no es válida. Use el formato indicado anteriormente." });
+    }
+
+    // Validar que se ingresó una máscara
+    if (isNaN(netmask)) {
+      errores.push({ campo: "#netmask", mensaje: "Por favor, ingrese una máscara de red." });
+    } else if (netmask < 1 || netmask > 30) {
+      // Validar rango de máscara
+      errores.push({ campo: "#netmask", mensaje: "La máscara de red debe estar entre /1 y /30." });
     }
 
     // obtenemos los datos de las subredes (nombre y # de hosts) y lo guardamos en un array
     const subredes = [];
+
     $(".subredGrupo").each(function (i) {
-      const nombre = $(this).find(`input[id^="subnetName"]`).val();
-      const hosts = parseInt($(this).find(`input[id^="subnetHost"]`).val());
-      if (!isNaN(hosts) && hosts > 0) {
+      const nombreInput = $(this).find(`input[id^="subnetName"]`);
+      const hostsInput = $(this).find(`input[id^="subnetHost"]`);
+      const nombre = nombreInput.val().trim();
+      const hostsStr = hostsInput.val();
+      const hosts = parseInt(hostsStr);
+
+      if (!nombre) {
+        errores.push({ campo: nombreInput, mensaje: `La subred ${i + 1} debe tener un nombre.` });
+      } else if (!hostsStr || isNaN(hosts) || hosts < 1) {
+        errores.push({ campo: hostsInput, mensaje: `Debe tener al menos 1 host.` });
+      } else if (!isNaN(netmask) && hosts > Math.pow(2, 32 - netmask) - 2) {
+        errores.push({ campo: hostsInput, mensaje: `Requiere más hosts (${hosts}) de los disponibles en la red /${netmask}.` });
+      } else {
         subredes.push({ nombre, hosts });
       }
     });
 
+    // Si hay errores, mostrarlos todos
+    if (errores.length > 0) {
+      errores.forEach(error => mostrarErrorEnCampo(error.campo, error.mensaje));
+      return;
+    }
+
+    // Validar que se agregaron subredes
+    if (subredes.length === 0) {
+      $(".error-message").remove();
+      mostrarErrorGeneral("Debe agregar al menos una subred. Haga clic en 'Agregar Subredes'.");
+      return;
+    }
+
     // realizamos el cálculo VLSM
-    const resultados = calcularVLSM(ipBase, netmask, subredes);
-    mostrarTablaVLSM(resultados);
+    try {
+      const resultados = calcularVLSM(ipBase, netmask, subredes);
+      mostrarTablaVLSM(resultados);
+    } catch (error) {
+      mostrarErrorGeneral("Error al calcular VLSM: " + error.message);
+    }
   });
 });
 
@@ -105,15 +152,44 @@ function validarIP(ip) {
   return regex.test(ip);
 }
 
+// Función para mostrar mensajes de error debajo de cada campo
+function mostrarErrorEnCampo(campo, mensaje) {
+  const $campo = $(campo);
+  
+  // Agregar clase de Bootstrap para campo inválido
+  $campo.addClass("is-invalid");
+  
+  // Crear mensaje de error
+  const errorHTML = `<div class="invalid-feedback d-block error-message">${mensaje}</div>`;
+  
+  // Insertar mensaje después del campo
+  $campo.after(errorHTML);
+  
+  // Scroll hacia el campo con error
+  $campo[0].scrollIntoView({ behavior: "smooth", block: "center" });
+  
+  // Enfocar el campo
+  $campo.focus();
+}
+
 // Mostrar los resultados en una tabla dentro del archivo HTML
 function mostrarTablaVLSM(resultados) {
   const tablaDiv = $("#tablaVLSM");
   tablaDiv.empty(); // Limpiar resultados anteriores, para evitar duplicados
 
   if (!resultados || resultados.length === 0) {
-    tablaDiv.html("<p>No hay resultados para mostrar.</p>");
+    mostrarErrorGeneral("No se pudieron generar resultados. Verifique los datos ingresados.");
     return;
   }
+
+  // Mostrar mensaje de éxito
+  const alertSuccess = `
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <strong>Éxito:</strong> Cálculo VLSM realizado correctamente.
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  `;
+  tablaDiv.append(alertSuccess);
 
   let tablaHTML = `
   <div class="card mt-4">
@@ -160,4 +236,15 @@ function mostrarTablaVLSM(resultados) {
 `;
 
   tablaDiv.html(tablaHTML); // insertar tabla en el DOM
+}
+
+// Función para mostrar errores generales en el área de resultados
+function mostrarErrorGeneral(mensaje) {
+  const alertHTML = `
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <strong> Error:</strong> ${mensaje}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  `;
+  $("#tablaVLSM").html(alertHTML);
 }

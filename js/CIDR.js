@@ -95,12 +95,45 @@ function bitsNecesariosParaSubredes(cantidad) {
 
 function calcularSubredesCIDR() {
   const ipStr = document.getElementById("ipInput").value.trim();
-  const cidrOriginal = Number(document.getElementById("cidrInput").value);
+  const cidrStr = document.getElementById("cidrInput").value.trim();
+  const cidrOriginal = Number(cidrStr);
   const cantidadSubredes = document.getElementById("subnetCount").value.trim();
   const output = document.getElementById("results");
 
-  if (!validarIP(ipStr)) {
-    output.innerHTML = "<p style='color:red;'>IP inválida</p>";
+  // Limpiar errores previos
+  limpiarErroresCIDR();
+
+  // Array para almacenar todos los errores
+  const errores = [];
+
+  // Validar que se ingresó una IP
+  if (!ipStr) {
+    errores.push({ campo: "ipInput", mensaje: "Por favor, ingrese una dirección IP." });
+  } else if (!validarIP(ipStr)) {
+    // Validar formato de IP
+    errores.push({ campo: "ipInput", mensaje: "La dirección IP ingresada no es válida. Use el formato indicado anteriormente." });
+  }
+
+  // Validar que se ingresó un CIDR
+  if (!cidrStr) {
+    errores.push({ campo: "cidrInput", mensaje: "Por favor, ingrese un prefijo CIDR." });
+  } else if (isNaN(cidrOriginal) || cidrOriginal < 0 || cidrOriginal > 32) {
+    // Validar rango de CIDR
+    errores.push({ campo: "cidrInput", mensaje: "El prefijo CIDR debe estar entre 0 y 32." });
+  }
+
+  // Validar cantidad de subredes (solo si está presente)
+  if (cantidadSubredes && (isNaN(Number(cantidadSubredes)) || Number(cantidadSubredes) < 1)) {
+    errores.push({ campo: "subnetCount", mensaje: "La cantidad de subredes debe ser al menos 1." });
+  }
+
+  // Si hay errores, mostrarlos todos
+  if (errores.length > 0) {
+    errores.forEach(error => mostrarErrorEnCampoCIDR(error.campo, error.mensaje, false));
+    // Scroll hacia el primer campo con error
+    if (errores.length > 0) {
+      document.getElementById(errores[0].campo).scrollIntoView({ behavior: "smooth", block: "center" });
+    }
     return;
   }
 
@@ -136,11 +169,19 @@ function calcularSubredesCIDR() {
 
   // Si se especifica una cantidad, dividir en subredes
   const cantidad = Number(cantidadSubredes);
+  
+  // Validar cantidad de subredes
+  if (cantidad > 1024) {
+    mostrarErrorEnCampoCIDR("subnetCount", "La cantidad máxima de subredes permitida es 1024.");
+    return;
+  }
+
   const bitsAdicionales = bitsNecesariosParaSubredes(cantidad);
   const nuevoCIDR = cidrOriginal + bitsAdicionales;
 
   if (nuevoCIDR > 32) {
-    output.innerHTML = "<p style='color:red;'>No es posible crear tantas subredes con ese prefijo.</p>";
+    const maxSubredes = Math.pow(2, 32 - cidrOriginal);
+    mostrarErrorEnCampoCIDR("subnetCount", `No es posible crear ${cantidad} subredes con el prefijo /${cidrOriginal}. El máximo permitido es ${maxSubredes} subredes.`);
     return;
   }
 
@@ -171,7 +212,8 @@ function calcularSubredesCIDR() {
   }
 
   output.innerHTML = `
-  <div class="text-center mt-5">
+  </div>
+  <div class="text-center mt-3">
     <h3 class="mb-4">Subredes generadas (${cantidad}) con prefijo /${nuevoCIDR}</h3>
     <div class="table-responsive d-flex justify-content-center">
       <table class="table table-bordered table-striped table-hover w-auto text-center shadow">
@@ -190,8 +232,54 @@ function calcularSubredesCIDR() {
         </tbody>
       </table>
     </div>
-  </div>
 `;
+}
+
+// --- Funciones para mostrar errores --- //
+
+// Limpiar errores previos
+function limpiarErroresCIDR() {
+  const errores = document.querySelectorAll(".error-message");
+  errores.forEach(error => error.remove());
+  const camposInvalidos = document.querySelectorAll(".is-invalid");
+  camposInvalidos.forEach(campo => campo.classList.remove("is-invalid"));
+}
+
+// Mostrar error debajo de un campo específico
+function mostrarErrorEnCampoCIDR(campoId, mensaje, scroll = true) {
+  const campo = document.getElementById(campoId);
+  
+  // Agregar clase de Bootstrap para campo inválido
+  campo.classList.add("is-invalid");
+  
+  // Crear mensaje de error
+  const errorDiv = document.createElement("div");
+  errorDiv.className = "invalid-feedback d-block error-message";
+  errorDiv.textContent = mensaje;
+  
+  // Insertar mensaje después del campo
+  campo.parentNode.insertBefore(errorDiv, campo.nextSibling);
+  
+  // Scroll hacia el campo con error solo si se especifica
+  if (scroll) {
+    campo.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+  
+  // Enfocar el campo
+  campo.focus();
+}
+
+// Mostrar error general en el área de resultados (mantener para casos específicos)
+function mostrarErrorCIDR(mensaje) {
+  const output = document.getElementById("results");
+  output.innerHTML = `
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <strong> Error:</strong> ${mensaje}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  `;
+  // Scroll hacia el mensaje de error
+  output.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 // --- Evento para ejecutar el cálculo al hacer clic --- //
