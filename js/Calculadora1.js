@@ -195,10 +195,9 @@ function calcularSubredesCIDR() {
 }
 
 // --- Evento para ejecutar el cálculo al hacer clic --- //
-documentdocument.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function() {
   const botonCalcular = document.getElementById("cargarScript");
   if (botonCalcular) {
     botonCalcular.addEventListener("click", calcularSubredesCIDR);
   }
 });
-
