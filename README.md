@@ -40,7 +40,7 @@ Puedes usar la calculadora directamente desde GitHub Pages:
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/o0AlanIsReyes0o/Calculadora_de_subredes.git
+git clone https://github.com/o0AlanisReyes0o/Calculadora_de_subredes.git
 ```
 
 ### 2.Ingresar al directorio del proyecto
